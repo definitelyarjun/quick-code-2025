@@ -107,17 +107,7 @@ The frontend will run on http://localhost:3000
    date-fns for date handling
    clsx & tailwind-merge for class name utilities
 
-  project/
-├── backend/
-│   ├── app.py                 # FastAPI application
-│   └── uploads/               # PDF storage
-└── frontend/
-    ├── src/
-    │   ├── components/        # React components
-    │   │   └── ui/           # Reusable UI components
-    │   ├── services/         # API integration
-    │   └── lib/              # Utilities
-    └── public/               # Static assets
+![Directory Structure](https://github.com/user-attachments/assets/86aa8cd3-e249-43d6-b406-dfbc2f86d1c4)
 
 ## Future Enhancements
 
