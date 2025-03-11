@@ -81,9 +81,9 @@ The frontend will run on http://localhost:3000
 4. Ask queries regarding the subject material and also ask questions regarding study planning
 5. Track your progress by marking chapters as complete and logging study time
 
-## Interface Demo
+## Interface Demo Screenshot
 
-!(Interface)(https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png)
+![Interface](https://github.com/user-attachments/assets/f6606461-fc24-49a6-9130-2b08977b4c88)
 
 ## Technology Stack
 
