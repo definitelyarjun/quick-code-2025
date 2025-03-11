@@ -1,50 +1,26 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Calendar as CalendarIcon, Moon, Sun } from 'lucide-react';
 import { StudyPlanner } from './components/StudyPlanner';
 import { StudyQuerySystem } from './components/StudyQuerySystem';
 import { api } from './services/api';
 
-function Layout({ children }) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-grid-slate-200/50 bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_20%,transparent_120%)]"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-[50rem] w-[50rem] rounded-full bg-gradient-to-tr from-purple-100/40 to-indigo-100/40 blur-3xl"></div>
-        </div>
-      </div>
+function App() {
+  const [activeSection, setActiveSection] = useState('query');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Apply theme class to body
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
-      {/* Navigation */}
-      <nav className="relative z-10 border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Study Assistant
-            </h1>
-            <div className="space-x-6">
-              <Link to="/" className="text-gray-700 hover:text-indigo-600 transition-colors font-medium">
-                Planner
-              </Link>
-              <Link to="/query" className="text-gray-700 hover:text-indigo-600 transition-colors font-medium">
-                Study Query
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 relative z-10">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-100">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function PlannerPage() {
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+  
   const handleSaveStudyPlan = async (data) => {
     try {
       // Upload PDFs first
@@ -76,14 +52,6 @@ function PlannerPage() {
     }
   };
 
-  return (
-    <Layout>
-      <StudyPlanner onSave={handleSaveStudyPlan} />
-    </Layout>
-  );
-}
-
-function QueryPage() {
   const handleQuery = async (query) => {
     try {
       const results = await api.queryDocuments(query);
@@ -95,20 +63,81 @@ function QueryPage() {
   };
 
   return (
-    <Layout>
-      <StudyQuerySystem onQuery={handleQuery} />
-    </Layout>
-  );
-}
+    <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+      <div className="container mx-auto px-4 py-12 max-w-5xl">
+        {/* Header with Calendar Icon and Theme Toggle */}
+        <div className="relative mb-8">
+          <button 
+            onClick={() => setActiveSection('planner')}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full ${
+              isDarkMode 
+                ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+            } transition-colors`}
+            aria-label="Go to Planner"
+          >
+            <CalendarIcon className="h-6 w-6" />
+          </button>
+          
+          {/* Theme Toggle Button */}
+          <button 
+            onClick={toggleTheme}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full ${
+              isDarkMode 
+                ? 'bg-gray-800 hover:bg-gray-700 text-yellow-300' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+            } transition-colors`}
+            aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDarkMode ? (
+              <Sun className="h-6 w-6" />
+            ) : (
+              <Moon className="h-6 w-6" />
+            )}
+          </button>
+          
+          {/* Greeting */}
+          <div className="text-center">
+            <h1 className={`text-4xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Good afternoon
+            </h1>
+            <p className={`text-xl ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              How can I help you today?
+            </p>
+          </div>
+        </div>
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<PlannerPage />} />
-        <Route path="/query" element={<QueryPage />} />
-      </Routes>
-    </Router>
+        {/* Main container - larger with rounded corners */}
+        <div className={`rounded-3xl shadow-md border p-10 ${
+          isDarkMode 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          {activeSection === 'planner' ? (
+            <div>
+              <div className="flex items-center mb-6">
+                <h2 className={`text-2xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Study Planner
+                </h2>
+                <button 
+                  onClick={() => setActiveSection('query')}
+                  className={`ml-auto px-4 py-2 rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  Back to Query
+                </button>
+              </div>
+              <StudyPlanner onSave={handleSaveStudyPlan} isDarkMode={isDarkMode} />
+            </div>
+          ) : (
+            <StudyQuerySystem onQuery={handleQuery} isDarkMode={isDarkMode} />
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

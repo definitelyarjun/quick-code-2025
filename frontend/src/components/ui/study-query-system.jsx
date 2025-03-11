@@ -33,23 +33,12 @@ export function StudyQuerySystem({ onQuery }) {
   };
 
   return (
-    <div className="h-[600px] border bg-background rounded-lg flex flex-col">
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">Study Material Query System</h2>
-        <p className="text-sm text-muted-foreground">
-          Ask questions about your study materials to find relevant information
-        </p>
-      </div>
-      
-      <div className="flex-1 overflow-hidden">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-auto">
         <ChatMessageList>
           {hasSearched && (
             <ChatBubble variant="sent">
-              <ChatBubbleAvatar
-                className="h-8 w-8 shrink-0"
-                fallback="U"
-              />
-              <ChatBubbleMessage variant="sent">
+              <ChatBubbleMessage variant="sent" className="bg-gray-100 text-gray-900">
                 {query}
               </ChatBubbleMessage>
             </ChatBubble>
@@ -57,26 +46,18 @@ export function StudyQuerySystem({ onQuery }) {
 
           {isLoading && (
             <ChatBubble variant="received">
-              <ChatBubbleAvatar
-                className="h-8 w-8 shrink-0"
-                fallback="AI"
-              />
-              <ChatBubbleMessage isLoading />
+              <ChatBubbleMessage isLoading className="bg-white" />
             </ChatBubble>
           )}
 
           {results.length > 0 && (
             <ChatBubble variant="received">
-              <ChatBubbleAvatar
-                className="h-8 w-8 shrink-0"
-                fallback="AI"
-              />
-              <ChatBubbleMessage variant="received">
+              <ChatBubbleMessage variant="received" className="bg-white">
                 <div className="space-y-4">
                   <p className="font-medium">Here are the most relevant passages from your study materials:</p>
                   {results.map((chunk, idx) => (
-                    <div key={idx} className="p-3 bg-muted/50 rounded-md">
-                      <p className="text-sm">{chunk}</p>
+                    <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                      <p className="text-gray-700">{chunk}</p>
                     </div>
                   ))}
                 </div>
@@ -86,11 +67,7 @@ export function StudyQuerySystem({ onQuery }) {
 
           {hasSearched && !isLoading && results.length === 0 && (
             <ChatBubble variant="received">
-              <ChatBubbleAvatar
-                className="h-8 w-8 shrink-0"
-                fallback="AI"
-              />
-              <ChatBubbleMessage variant="received">
+              <ChatBubbleMessage variant="received" className="bg-white">
                 No relevant information found in your study materials. Try rephrasing your question.
               </ChatBubbleMessage>
             </ChatBubble>
@@ -98,37 +75,25 @@ export function StudyQuerySystem({ onQuery }) {
         </ChatMessageList>
       </div>
 
-      <div className="p-4 border-t">
-        <form
-          onSubmit={handleSubmit}
-          className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-1"
-        >
-          <ChatInput
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask a question about your study materials..."
-            className="min-h-12 resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
-          />
-          <div className="flex items-center p-3 pt-0 justify-between">
-            <div className="flex">
-              <Button
-                variant="ghost"
-                size="icon"
-                type="button"
-                disabled={isLoading}
+      <div className="mt-4">
+        <form onSubmit={handleSubmit}>
+          <div className="relative rounded-xl border border-gray-200 bg-gray-50 focus-within:ring-2 focus-within:ring-gray-200 focus-within:border-gray-300">
+            <ChatInput
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="What do you want to know?"
+              className="min-h-[56px] w-full resize-none rounded-xl bg-transparent px-4 py-[1.3rem] text-base focus:outline-none"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+              <Button 
+                type="submit" 
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors"
+                disabled={!query.trim() || isLoading}
               >
-                <Search className="h-4 w-4" />
+                {isLoading ? "Searching..." : "Search"}
+                <CornerDownLeft className="h-4 w-4" />
               </Button>
             </div>
-            <Button 
-              type="submit" 
-              size="sm" 
-              className="ml-auto gap-1.5"
-              disabled={!query.trim() || isLoading}
-            >
-              {isLoading ? "Searching..." : "Search"}
-              <CornerDownLeft className="h-3.5 w-3.5" />
-            </Button>
           </div>
         </form>
       </div>

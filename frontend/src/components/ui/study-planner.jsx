@@ -1,357 +1,396 @@
-import React, { useState, useRef } from "react";
-import { Calendar as CalendarIcon, Clock, FileUp, Upload, X, CheckCircle, BookOpen, BookMarked } from "lucide-react";
+import React, { useState } from "react";
+import { Calendar as CalendarIcon, Plus, X, Edit, Trash2, Clock } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths } from "date-fns";
 import { cn } from "../../lib/utils";
-import { Button } from "./button";
-import { Input } from "./input";
-import { Label } from "./label";
-import { Progress } from "./progress";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
-import { Calendar } from "./calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { addDays, format } from "date-fns";
 
-const presets = [
-  { label: "Next Week", value: addDays(new Date(), 7) },
-  { label: "Next Month", value: addDays(new Date(), 30) },
-  { label: "3 Months", value: addDays(new Date(), 90) },
-  { label: "6 Months", value: addDays(new Date(), 180) },
-];
-
-const formatDate = (date) => {
-  if (!date) return "";
-  return format(date, "PPP");
-};
-
-export function StudyPlanner({ onSave }) {
-  const [testDate, setTestDate] = useState();
-  const [chapters, setChapters] = useState([
-    { id: "1", name: "Introduction", timeSpent: 0, completed: false },
-    { id: "2", name: "Basic Concepts", timeSpent: 0, completed: false },
-    { id: "3", name: "Advanced Topics", timeSpent: 0, completed: false },
-    { id: "4", name: "Case Studies", timeSpent: 0, completed: false },
-    { id: "5", name: "Review", timeSpent: 0, completed: false },
+export function StudyPlanner({ onSave, isDarkMode = false }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [tasks, setTasks] = useState([
+    { id: 1, date: new Date(), title: "Review Chapter 1", time: "10:00 AM" },
+    { id: 2, date: new Date(new Date().setDate(new Date().getDate() + 2)), title: "Complete Practice Test", time: "2:00 PM" },
+    { id: 3, date: new Date(new Date().setDate(new Date().getDate() + 5)), title: "Study Group Meeting", time: "4:30 PM" },
   ]);
-  const [newChapterName, setNewChapterName] = useState("");
-  const [files, setFiles] = useState([]);
-  const fileInputRef = useRef(null);
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [isEditingTask, setIsEditingTask] = useState(null);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskTime, setNewTaskTime] = useState("");
 
-  const completedChapters = chapters.filter(chapter => chapter.completed);
-  const remainingChapters = chapters.filter(chapter => !chapter.completed);
-  const progress = chapters.length > 0 ? (completedChapters.length / chapters.length) * 100 : 0;
+  // Generate days for the current month view
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setFiles(prev => [...prev, ...newFiles]);
-    }
+  // Get day names for header
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // Get tasks for selected date
+  const selectedDateTasks = tasks.filter(task => 
+    isSameDay(new Date(task.date), selectedDate)
+  );
+
+  // Handle navigation between months
+  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+
+  // Handle adding a new task
+  const handleAddTask = () => {
+    if (newTaskTitle.trim() === "") return;
+    
+    const newTask = {
+      id: Date.now(),
+      date: selectedDate,
+      title: newTaskTitle,
+      time: newTaskTime || "All day"
+    };
+    
+    setTasks([...tasks, newTask]);
+    setNewTaskTitle("");
+    setNewTaskTime("");
+    setIsAddingTask(false);
   };
 
-  const handleRemoveFile = (index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+  // Handle updating a task
+  const handleUpdateTask = () => {
+    if (newTaskTitle.trim() === "" || !isEditingTask) return;
+    
+    setTasks(tasks.map(task => 
+      task.id === isEditingTask.id 
+        ? { ...task, title: newTaskTitle, time: newTaskTime || task.time } 
+        : task
+    ));
+    
+    setNewTaskTitle("");
+    setNewTaskTime("");
+    setIsEditingTask(null);
   };
 
-  const handleAddChapter = () => {
-    if (newChapterName.trim()) {
-      setChapters(prev => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          name: newChapterName,
-          timeSpent: 0,
-          completed: false,
-        },
-      ]);
-      setNewChapterName("");
-    }
+  // Handle deleting a task
+  const handleDeleteTask = (taskId) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
   };
 
-  const handleToggleComplete = (id) => {
-    setChapters(prev =>
-      prev.map(chapter =>
-        chapter.id === id
-          ? { ...chapter, completed: !chapter.completed }
-          : chapter
-      )
-    );
+  // Start editing a task
+  const startEditTask = (task) => {
+    setIsEditingTask(task);
+    setNewTaskTitle(task.title);
+    setNewTaskTime(task.time);
   };
 
-  const handleUpdateTime = (id, time) => {
-    setChapters(prev =>
-      prev.map(chapter =>
-        chapter.id === id
-          ? { ...chapter, timeSpent: time }
-          : chapter
-      )
-    );
-  };
-
-  const handleSave = () => {
-    if (onSave) {
-      onSave({
-        testDate,
-        chapters,
-        files,
-      });
-    }
+  // Get task count for a specific day (for the dots in calendar)
+  const getTaskCountForDay = (day) => {
+    return tasks.filter(task => isSameDay(new Date(task.date), day)).length;
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-white/95 backdrop-blur-sm shadow-xl border-gray-100">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-          Study Planner
-        </CardTitle>
-        <CardDescription className="text-gray-500">
-          Track your progress, manage study materials, and prepare for your test
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <Label htmlFor="test-date" className="text-sm font-medium text-gray-700">Test Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full md:w-[300px] justify-start text-left font-normal border-gray-200 hover:bg-gray-50",
-                    !testDate && "text-gray-500"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-indigo-500" />
-                  {testDate ? formatDate(testDate) : "Select test date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <div className="p-4 border-b border-gray-100">
-                  <div className="space-y-2">
-                    {presets.map((preset) => (
-                      <Button
-                        key={preset.label}
-                        variant="ghost"
-                        className="w-full justify-start font-normal hover:bg-gray-50"
-                        onClick={() => setTestDate(preset.value)}
-                      >
-                        {preset.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <Calendar
-                  value={testDate}
-                  onChange={setTestDate}
-                  className="rounded-md border-0"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium text-gray-700">Overall Progress</Label>
-              <span className="text-sm text-gray-500">
-                {completedChapters.length} of {chapters.length} chapters completed
-              </span>
-            </div>
-            <Progress value={progress} className="h-2 bg-gray-100" />
-          </div>
+    <div className="space-y-6">
+      {/* Calendar Header */}
+      <div className="flex items-center justify-between">
+        <h2 className={`text-2xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          {format(currentMonth, "MMMM yyyy")}
+        </h2>
+        <div className="flex space-x-2">
+          <button 
+            onClick={prevMonth}
+            className={`p-2 rounded-lg ${
+              isDarkMode 
+                ? 'hover:bg-gray-700 text-gray-300' 
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
+          <button 
+            onClick={nextMonth}
+            className={`p-2 rounded-lg ${
+              isDarkMode 
+                ? 'hover:bg-gray-700 text-gray-300' 
+                : 'hover:bg-gray-100 text-gray-700'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
         </div>
+      </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium text-gray-700">Study Materials</Label>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50"
-            >
-              <FileUp className="h-4 w-4 text-indigo-500" />
-              Upload Files
-            </Button>
-            <Input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileChange}
-              multiple
-            />
-          </div>
-          
-          {files.length > 0 ? (
-            <div className="space-y-3 mt-2">
-              {files.map((file, index) => (
-                <div 
-                  key={index} 
-                  className="group flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-indigo-50 text-indigo-500">
-                      <Upload className="h-4 w-4" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900 truncate max-w-[300px]">
-                        {file.name}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </span>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleRemoveFile(index)}
-                    className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
+      {/* Calendar Grid */}
+      <div className={`rounded-xl overflow-hidden border ${
+        isDarkMode ? 'border-zinc-800' : 'border-gray-200'
+      }`}>
+        {/* Day names header */}
+        <div className={`grid grid-cols-7 ${
+          isDarkMode ? 'bg-black' : 'bg-gray-50'
+        }`}>
+          {weekDays.map((day) => (
             <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
+              key={day} 
+              className={`py-3 text-center text-sm font-medium ${
+                isDarkMode ? 'text-zinc-300' : 'text-gray-500'
+              }`}
             >
-              <div className="p-3 rounded-full bg-indigo-50 text-indigo-600 mb-4">
-                <Upload className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-medium text-gray-900">Drop your files here or click to upload</p>
-              <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB each</p>
+              {day}
             </div>
+          ))}
+        </div>
+        
+        {/* Calendar days */}
+        <div className={`grid grid-cols-7 ${
+          isDarkMode ? 'bg-black' : 'bg-white'
+        }`}>
+          {daysInMonth.map((day, i) => {
+            const taskCount = getTaskCountForDay(day);
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDate(day)}
+                className={cn(
+                  `h-24 p-2 border-t border-r relative transition-colors ${
+                    isDarkMode 
+                      ? 'border-zinc-800 hover:bg-zinc-900 text-zinc-300' 
+                      : 'border-gray-100 hover:bg-gray-50 text-gray-700'
+                  }`,
+                  i % 7 === 6 && "border-r-0", // Remove right border on last column
+                  isSameDay(day, selectedDate) && (isDarkMode ? 'bg-black border-zinc-700' : 'bg-blue-50'),
+                  isToday(day) && "font-bold"
+                )}
+              >
+                <span className={cn(
+                  "inline-flex h-6 w-6 items-center justify-center rounded-full text-sm",
+                  isToday(day) && (isDarkMode ? 'bg-black text-white border border-zinc-700' : 'bg-blue-100 text-blue-700')
+                )}>
+                  {format(day, "d")}
+                </span>
+                
+                {/* Task indicators */}
+                {taskCount > 0 && (
+                  <div className="absolute bottom-2 right-2 flex space-x-1">
+                    {taskCount <= 3 ? (
+                      Array(taskCount).fill(0).map((_, i) => (
+                        <div key={i} className={`h-2 w-2 rounded-full ${
+                          isDarkMode ? 'bg-zinc-500' : 'bg-blue-500'
+                        }`}></div>
+                      ))
+                    ) : (
+                      <div className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                        isDarkMode 
+                          ? 'bg-black text-zinc-300 border border-zinc-800' 
+                          : 'bg-blue-100 text-blue-600'
+                      }`}>
+                        {taskCount}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Selected Day Tasks */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className={`text-lg font-medium ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>
+            {format(selectedDate, "MMMM d, yyyy")}
+          </h3>
+          {!isAddingTask && !isEditingTask && (
+            <button
+              onClick={() => setIsAddingTask(true)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'bg-black hover:bg-zinc-900 text-zinc-300 border border-zinc-800' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Task</span>
+            </button>
           )}
         </div>
 
-        <Tabs defaultValue="completed" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="completed" className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Completed Chapters
-            </TabsTrigger>
-            <TabsTrigger value="remaining" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Remaining Chapters
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="completed" className="space-y-4 mt-4">
-            {completedChapters.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border-2 border-dashed">
-                <CheckCircle className="h-12 w-12 mb-4 text-gray-400" />
-                <p className="text-sm">No completed chapters yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {completedChapters.map(chapter => (
-                  <div 
-                    key={chapter.id} 
-                    className="group flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors">
-                        <BookMarked className="h-5 w-5" />
-                      </div>
-                      <span className="font-medium text-gray-900">{chapter.name}</span>
+        {/* Task list */}
+        {selectedDateTasks.length === 0 && !isAddingTask && !isEditingTask ? (
+          <div className={`py-8 text-center border-2 border-dashed rounded-xl ${
+            isDarkMode 
+              ? 'bg-black text-zinc-400 border-zinc-800' 
+              : 'bg-gray-50 text-gray-500 border-gray-200'
+          }`}>
+            No tasks scheduled for this day
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {selectedDateTasks.map(task => (
+              <div 
+                key={task.id}
+                className={cn(
+                  `p-4 rounded-xl border ${
+                    isDarkMode 
+                      ? 'bg-black border-zinc-800' 
+                      : 'bg-white border-gray-200'
+                  }`,
+                  isEditingTask?.id === task.id && (isDarkMode ? 'ring-2 ring-zinc-700' : 'ring-2 ring-blue-200')
+                )}
+              >
+                {isEditingTask?.id === task.id ? (
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                        isDarkMode 
+                          ? 'bg-black border-zinc-800 text-white focus:ring-zinc-700' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                      placeholder="Task title"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Clock className={isDarkMode ? 'text-zinc-500' : 'text-gray-500'} />
+                      <input
+                        type="text"
+                        value={newTaskTime}
+                        onChange={(e) => setNewTaskTime(e.target.value)}
+                        className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                          isDarkMode 
+                            ? 'bg-black border-zinc-800 text-white focus:ring-zinc-700' 
+                            : 'border-gray-300 focus:ring-blue-500'
+                        }`}
+                        placeholder="Time (e.g. 3:00 PM)"
+                      />
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-lg">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <Input
-                          type="number"
-                          value={chapter.timeSpent || 0}
-                          onChange={(e) => handleUpdateTime(chapter.id, parseInt(e.target.value) || 0)}
-                          className="w-16 h-8 text-sm border-0 bg-transparent focus:ring-0"
-                        />
-                        <span className="text-sm text-gray-500">min</span>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleToggleComplete(chapter.id)}
-                        className="hover:bg-gray-100 text-gray-700"
+                    <div className="flex justify-end space-x-2 pt-2">
+                      <button
+                        onClick={() => setIsEditingTask(null)}
+                        className={`px-3 py-1.5 rounded-lg ${
+                          isDarkMode 
+                            ? 'bg-black hover:bg-zinc-900 text-zinc-300 border border-zinc-800' 
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
                       >
-                        Mark Incomplete
-                      </Button>
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleUpdateTask}
+                        className={`px-3 py-1.5 rounded-lg ${
+                          isDarkMode 
+                            ? 'bg-black hover:bg-zinc-900 text-white border border-zinc-700' 
+                            : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
+                        }`}
+                      >
+                        Save
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="remaining" className="space-y-4 mt-4">
-            {remainingChapters.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border-2 border-dashed">
-                <BookOpen className="h-12 w-12 mb-4 text-gray-400" />
-                <p className="text-sm">All chapters completed!</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {remainingChapters.map(chapter => (
-                  <div 
-                    key={chapter.id} 
-                    className="group flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gray-50 text-gray-500 group-hover:bg-gray-100 transition-colors">
-                        <BookOpen className="h-5 w-5" />
+                ) : (
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className={`font-medium ${
+                        isDarkMode ? 'text-zinc-200' : 'text-gray-900'
+                      }`}>
+                        {task.title}
+                      </h4>
+                      <div className={`flex items-center mt-1 text-sm ${
+                        isDarkMode ? 'text-zinc-400' : 'text-gray-500'
+                      }`}>
+                        <Clock className="h-3.5 w-3.5 mr-1" />
+                        {task.time}
                       </div>
-                      <span className="font-medium text-gray-900">{chapter.name}</span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-lg">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <Input
-                          type="number"
-                          value={chapter.timeSpent || 0}
-                          onChange={(e) => handleUpdateTime(chapter.id, parseInt(e.target.value) || 0)}
-                          className="w-16 h-8 text-sm border-0 bg-transparent focus:ring-0"
-                        />
-                        <span className="text-sm text-gray-500">min</span>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleToggleComplete(chapter.id)}
-                        className="hover:bg-indigo-50 text-indigo-600"
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => startEditTask(task)}
+                        className={`p-1.5 rounded-lg ${
+                          isDarkMode 
+                            ? 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900' 
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
                       >
-                        Mark Complete
-                      </Button>
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className={`p-1.5 rounded-lg ${
+                          isDarkMode 
+                            ? 'text-zinc-400 hover:text-red-300 hover:bg-zinc-900' 
+                            : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                        }`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
-                ))}
+                )}
+              </div>
+            ))}
+
+            {/* Add new task form */}
+            {isAddingTask && (
+              <div className={`p-4 rounded-xl border ${
+                isDarkMode 
+                  ? 'bg-black border-zinc-800 ring-2 ring-zinc-700' 
+                  : 'bg-white border-gray-200 ring-2 ring-blue-200'
+              }`}>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                      isDarkMode 
+                        ? 'bg-black border-zinc-800 text-white focus:ring-zinc-700' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
+                    placeholder="Task title"
+                    autoFocus
+                  />
+                  <div className="flex items-center gap-2">
+                    <Clock className={isDarkMode ? 'text-zinc-500' : 'text-gray-500'} />
+                    <input
+                      type="text"
+                      value={newTaskTime}
+                      onChange={(e) => setNewTaskTime(e.target.value)}
+                      className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                        isDarkMode 
+                          ? 'bg-black border-zinc-800 text-white focus:ring-zinc-700' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                      placeholder="Time (e.g. 3:00 PM)"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2 pt-2">
+                    <button
+                      onClick={() => setIsAddingTask(false)}
+                      className={`px-3 py-1.5 rounded-lg ${
+                        isDarkMode 
+                          ? 'bg-black hover:bg-zinc-900 text-zinc-300 border border-zinc-800' 
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddTask}
+                      className={`px-3 py-1.5 rounded-lg ${
+                        isDarkMode 
+                          ? 'bg-black hover:bg-zinc-900 text-white border border-zinc-700' 
+                          : 'bg-blue-100 hover:bg-blue-200 text-blue-700'
+                      }`}
+                    >
+                      Add Task
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
-            
-            <div className="flex items-center gap-2 mt-4">
-              <Input
-                placeholder="Add new chapter"
-                value={newChapterName}
-                onChange={(e) => setNewChapterName(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={handleAddChapter}>Add</Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="flex justify-end space-x-2 bg-gray-50/50">
-        <Button
-          variant="outline"
-          onClick={() => window.location.reload()}
-          className="border-gray-200 hover:bg-gray-50"
-        >
-          Reset
-        </Button>
-        <Button
-          onClick={handleSave}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700"
-        >
-          Save Study Plan
-        </Button>
-      </CardFooter>
-    </Card>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
