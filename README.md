@@ -8,7 +8,7 @@ https://repo.surf/definitelyarjun/quick-code-2025
 
 ## Project Architecture
 
-!(Architecture)[https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png]
+!(Architecture)(https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png)
 
 ## Team Members
 
@@ -83,7 +83,7 @@ The frontend will run on http://localhost:3000
 
 ## Interface Demo
 
-!(Interface)[https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png]
+!(Interface)(https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png)
 
 ## Technology Stack
 
