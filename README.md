@@ -1,16 +1,27 @@
-# Study Planner and Learning Assistant
+# Study Planner and Learning Partner.
 
-A personalized, college-specific study planner that uses RAG (Retrieval-Augmented Generation) to help students organize their study schedule and get answers from their study materials.
+A personalized, college-specific study planner that uses RAG (Retrieval-Augmented Generation) to help students organize their study schedule and get answers from their study materials, ALso helps teachers plan what to teach based on content material sourced from KTU Notes.
+
+## Commit history timeline
+
+https://repo.surf/definitelyarjun/quick-code-2025
+
+## Team Members
+
+Arjun Jayakumar (Team Lead- Backend and LLM's)
+Aditya S Nair (Frontend)
+Abhiram Krishna (UI and Presentation)
+Rajkamal SP (UI,UX Design)
 
 ## Features
 
-- Upload and process study materials (PDFs)
+- A vector database consisting of prexisting notes fetched from KTU Notes.
 - Track study progress by chapter
 - Generate adaptive study schedules based on:
   - Learning pace
   - Content complexity
   - Test deadline
-- Query study materials for relevant information
+- Query study materials for relevant information, Also test your skills by solving previous year Question papers.
 - Visual progress tracking
 
 ## Setup and Installation
@@ -31,17 +42,16 @@ source venv/bin/activate  # Linux/Mac
 
 3. Install required packages:
 ```bash
-pip install fastapi uvicorn pdfplumber python-multipart
-```
+pip install -r requirements.txt
 
 4. Start the backend server:
 ```bash
-uvicorn app:app --reload
+python start.py
 ```
 
 The backend will run on http://localhost:8000
 
-### Frontend Setup
+### Frontend Setup (in a separate terminal)
 
 1. Navigate to the frontend directory:
 ```bash
@@ -63,31 +73,49 @@ The frontend will run on http://localhost:3000
 ## Using the Application
 
 1. Open http://localhost:3000 in your browser
-2. Upload study materials (PDFs) using the file upload button
-3. Set your test date using the calendar
-4. Add or import chapters you need to study
+2. Upload study materials (PDFs) using the file upload button (In the future this wont be neccessary as we will store the vecotirized data in the PDF to a DB)
+4. Ask queries regarding the subject material and also ask questions regarding study planning
 5. Track your progress by marking chapters as complete and logging study time
-6. Use the query system to ask questions about your study materials
 
 ## Technology Stack
 
-- Backend:
-  - FastAPI - Web framework for building APIs
-  - pdfplumber - PDF text extraction
-  - Simple keyword-based search for MVP
-  - (Note: Full RAG functionality with sentence-transformers and FAISS will be added in future releases)
+- Backend Technologies:
+   Python 3.8+ as the core programming language
+   FastAPI for the web framework
+   Pydantic for data validation
+   Uvicorn as the ASGI server
+   PyMuPDF (fitz) for PDF processing
+   Sentence-Transformers for text embeddings
+   FAISS for vector similarity search
+   Transformers from Hugging Face for NLP models
+   PyTorch as the deep learning framework
+   Accelerate & BitsAndBytes for model optimization
 
-- Frontend:
-  - React - UI framework
-  - TailwindCSS - Styling
-  - Custom UI components for calendar and popover
+- Frontend Technologies:
+   React 18 for the UI framework
+   TailwindCSS for styling
+   Lucide React for icons
+   React Router for navigation
+   date-fns for date handling
+   clsx & tailwind-merge for class name utilities
+
+  project/
+├── backend/
+│   ├── app.py                 # FastAPI application
+│   └── uploads/               # PDF storage
+└── frontend/
+    ├── src/
+    │   ├── components/        # React components
+    │   │   └── ui/           # Reusable UI components
+    │   ├── services/         # API integration
+    │   └── lib/              # Utilities
+    └── public/               # Static assets
 
 ## Future Enhancements
 
 1. Implement full RAG system with:
-   - Hugging Face's sentence-transformers for text embeddings
-   - FAISS for efficient vector similarity search
-   - Integration with LLMs for better answer generation
+   - FAISS for efficient vector similarity search (Current implementation doesnt store the chunked PDF to a Database, In the future we will chunk and vectorize all the study materials sourced from KTU Notes and store them in the DB)
+   - LLM's with higher paramters for better results.
 
 2. User authentication and persistent storage
 3. Advanced scheduling algorithms

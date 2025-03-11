@@ -9,6 +9,28 @@ This is a Retrieval Augmented Generation (RAG) system for study materials. It al
 - **Vector Search**: Fast and accurate semantic search over document content
 - **Study Planning**: Create study schedules based on your progress and remaining chapters
 
+## Technology Stack
+
+### Backend
+- **Python 3.8+**: Core programming language
+- **FastAPI**: Modern, high-performance web framework for building APIs
+- **Pydantic**: Data validation and settings management
+- **Uvicorn**: ASGI server for serving the FastAPI application
+- **PyMuPDF (fitz)**: PDF processing and text extraction
+- **Sentence-Transformers**: State-of-the-art text embeddings for semantic search
+- **FAISS**: Efficient similarity search and clustering of dense vectors
+- **Transformers**: Hugging Face's library for state-of-the-art NLP models
+- **PyTorch**: Deep learning framework powering the language models
+- **Accelerate & BitsAndBytes**: Optimization libraries for efficient model inference
+
+### Frontend
+- **React 18**: Modern JavaScript library for building user interfaces
+- **TailwindCSS**: Utility-first CSS framework for rapid UI development
+- **Lucide React**: Beautiful, consistent icon set
+- **React Router**: Navigation and routing for React applications
+- **date-fns**: Modern JavaScript date utility library
+- **clsx & tailwind-merge**: Utilities for conditional class name construction
+
 ## Technical Implementation
 
 This implementation uses a modern RAG architecture with the following components:
@@ -33,27 +55,39 @@ This implementation uses a modern RAG architecture with the following components
 ### Prerequisites
 
 - Python 3.8+
-- FastAPI
-- Sentence-Transformers
-- PyMuPDF
-- FAISS
-- Transformers
+- Node.js and npm
 
-### Installation
+### Backend Installation
 
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
 
+### Frontend Installation
+
+```bash
+cd frontend
+npm install
+```
+
 ### Running the API
 
 ```bash
 cd backend
-uvicorn app:app --reload
+python start.py
 ```
 
 The API will be available at http://localhost:8000
+
+### Running the Frontend
+
+```bash
+cd frontend
+npm start
+```
+
+The frontend will be available at http://localhost:3000
 
 ### API Documentation
 
