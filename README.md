@@ -6,6 +6,10 @@ A personalized, college-specific study planner that uses RAG (Retrieval-Augmente
 
 https://repo.surf/definitelyarjun/quick-code-2025
 
+## Project Architecture
+
+!(Architecture)[https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png]
+
 ## Team Members
 
 Arjun Jayakumar (Team Lead- Backend and LLM's)
@@ -76,6 +80,10 @@ The frontend will run on http://localhost:3000
 2. Upload study materials (PDFs) using the file upload button (In the future this wont be neccessary as we will store the vecotirized data in the PDF to a DB)
 4. Ask queries regarding the subject material and also ask questions regarding study planning
 5. Track your progress by marking chapters as complete and logging study time
+
+## Interface Demo
+
+!(Interface)[https://raw.githubusercontent.com/definitelyarjun/quick-code-2025/refs/heads/main/embeddings/UI%20-%20With%20Functionalities%20.png]
 
 ## Technology Stack
 
