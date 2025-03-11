@@ -8,7 +8,7 @@ https://repo.surf/definitelyarjun/quick-code-2025
 
 ## Project Architecture
 
-!(Architecture)(https://github.com/definitelyarjun/quick-code-2025/blob/main/embeddings/UI%20-%20With%20Functionalities%20.png)
+![Architecture](https://github.com/user-attachments/assets/5ec952e5-c44b-4029-9d39-c16fe22fcf4b)
 
 ## Team Members
 
