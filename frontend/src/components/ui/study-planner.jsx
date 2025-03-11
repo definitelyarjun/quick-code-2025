@@ -9,11 +9,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { addDays, format } from "date-fns";
+
+const presets = [
+  { label: "Next Week", value: addDays(new Date(), 7) },
+  { label: "Next Month", value: addDays(new Date(), 30) },
+  { label: "3 Months", value: addDays(new Date(), 90) },
+  { label: "6 Months", value: addDays(new Date(), 180) },
+];
 
 const formatDate = (date) => {
   if (!date) return "";
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  return format(date, "PPP");
 };
 
 export function StudyPlanner({ onSave }) {
@@ -90,34 +97,51 @@ export function StudyPlanner({ onSave }) {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle>Study Planner</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-4xl mx-auto bg-white/95 backdrop-blur-sm shadow-xl border-gray-100">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          Study Planner
+        </CardTitle>
+        <CardDescription className="text-gray-500">
           Track your progress, manage study materials, and prepare for your test
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="test-date">Test Date</Label>
+        <div className="space-y-4">
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="test-date" className="text-sm font-medium text-gray-700">Test Date</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    !testDate && "text-muted-foreground"
+                    "w-full md:w-[300px] justify-start text-left font-normal border-gray-200 hover:bg-gray-50",
+                    !testDate && "text-gray-500"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="mr-2 h-4 w-4 text-indigo-500" />
                   {testDate ? formatDate(testDate) : "Select test date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
+                <div className="p-4 border-b border-gray-100">
+                  <div className="space-y-2">
+                    {presets.map((preset) => (
+                      <Button
+                        key={preset.label}
+                        variant="ghost"
+                        className="w-full justify-start font-normal hover:bg-gray-50"
+                        onClick={() => setTestDate(preset.value)}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 <Calendar
                   value={testDate}
                   onChange={setTestDate}
+                  className="rounded-md border-0"
                 />
               </PopoverContent>
             </Popover>
@@ -125,25 +149,25 @@ export function StudyPlanner({ onSave }) {
           
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
-              <Label>Overall Progress</Label>
-              <span className="text-sm text-muted-foreground">
+              <Label className="text-sm font-medium text-gray-700">Overall Progress</Label>
+              <span className="text-sm text-gray-500">
                 {completedChapters.length} of {chapters.length} chapters completed
               </span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-2 bg-gray-100" />
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label>Study Materials</Label>
+            <Label className="text-sm font-medium text-gray-700">Study Materials</Label>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-gray-200 hover:bg-gray-50"
             >
-              <FileUp className="h-4 w-4" />
+              <FileUp className="h-4 w-4 text-indigo-500" />
               Upload Files
             </Button>
             <Input
@@ -155,27 +179,47 @@ export function StudyPlanner({ onSave }) {
             />
           </div>
           
-          {files.length > 0 && (
-            <div className="space-y-2 mt-2">
+          {files.length > 0 ? (
+            <div className="space-y-3 mt-2">
               {files.map((file, index) => (
                 <div 
                   key={index} 
-                  className="flex items-center justify-between p-2 rounded-md border bg-background"
+                  className="group flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
                 >
-                  <div className="flex items-center gap-2">
-                    <Upload className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm truncate max-w-[300px]">{file.name}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-indigo-50 text-indigo-500">
+                      <Upload className="h-4 w-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900 truncate max-w-[300px]">
+                        {file.name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                    </div>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={() => handleRemoveFile(index)}
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              <div className="p-3 rounded-full bg-indigo-50 text-indigo-600 mb-4">
+                <Upload className="h-6 w-6" />
+              </div>
+              <p className="text-sm font-medium text-gray-900">Drop your files here or click to upload</p>
+              <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB each</p>
             </div>
           )}
         </div>
@@ -194,36 +238,39 @@ export function StudyPlanner({ onSave }) {
           
           <TabsContent value="completed" className="space-y-4 mt-4">
             {completedChapters.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No completed chapters yet
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border-2 border-dashed">
+                <CheckCircle className="h-12 w-12 mb-4 text-gray-400" />
+                <p className="text-sm">No completed chapters yet</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {completedChapters.map(chapter => (
                   <div 
                     key={chapter.id} 
-                    className="flex items-center justify-between p-3 rounded-md border bg-muted/50"
+                    className="group flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
                   >
-                    <div className="flex items-center gap-2">
-                      <BookMarked className="h-4 w-4 text-primary" />
-                      <span>{chapter.name}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                        <BookMarked className="h-5 w-5" />
+                      </div>
+                      <span className="font-medium text-gray-900">{chapter.name}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-lg">
+                        <Clock className="h-4 w-4 text-gray-500" />
                         <Input
                           type="number"
                           value={chapter.timeSpent || 0}
                           onChange={(e) => handleUpdateTime(chapter.id, parseInt(e.target.value) || 0)}
-                          className="w-16 h-8 text-sm"
+                          className="w-16 h-8 text-sm border-0 bg-transparent focus:ring-0"
                         />
-                        <span className="text-sm text-muted-foreground">min</span>
+                        <span className="text-sm text-gray-500">min</span>
                       </div>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handleToggleComplete(chapter.id)}
-                        className="h-8"
+                        className="hover:bg-gray-100 text-gray-700"
                       >
                         Mark Incomplete
                       </Button>
@@ -236,28 +283,43 @@ export function StudyPlanner({ onSave }) {
           
           <TabsContent value="remaining" className="space-y-4 mt-4">
             {remainingChapters.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                All chapters completed!
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-gray-50/50 rounded-lg border-2 border-dashed">
+                <BookOpen className="h-12 w-12 mb-4 text-gray-400" />
+                <p className="text-sm">All chapters completed!</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {remainingChapters.map(chapter => (
                   <div 
                     key={chapter.id} 
-                    className="flex items-center justify-between p-3 rounded-md border"
+                    className="group flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200"
                   >
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                      <span>{chapter.name}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-gray-50 text-gray-500 group-hover:bg-gray-100 transition-colors">
+                        <BookOpen className="h-5 w-5" />
+                      </div>
+                      <span className="font-medium text-gray-900">{chapter.name}</span>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleToggleComplete(chapter.id)}
-                      className="h-8"
-                    >
-                      Mark Complete
-                    </Button>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-lg">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <Input
+                          type="number"
+                          value={chapter.timeSpent || 0}
+                          onChange={(e) => handleUpdateTime(chapter.id, parseInt(e.target.value) || 0)}
+                          className="w-16 h-8 text-sm border-0 bg-transparent focus:ring-0"
+                        />
+                        <span className="text-sm text-gray-500">min</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleToggleComplete(chapter.id)}
+                        className="hover:bg-indigo-50 text-indigo-600"
+                      >
+                        Mark Complete
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -275,9 +337,20 @@ export function StudyPlanner({ onSave }) {
           </TabsContent>
         </Tabs>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline">Reset</Button>
-        <Button onClick={handleSave}>Save Study Plan</Button>
+      <CardFooter className="flex justify-end space-x-2 bg-gray-50/50">
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="border-gray-200 hover:bg-gray-50"
+        >
+          Reset
+        </Button>
+        <Button
+          onClick={handleSave}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700"
+        >
+          Save Study Plan
+        </Button>
       </CardFooter>
     </Card>
   );

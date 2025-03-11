@@ -23,14 +23,19 @@ export const api = {
     return response.json();
   },
 
-  async queryDocuments(query) {
-    const response = await fetch(`${API_URL}/query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    });
-    return response.json();
+  async queryDocuments(query, method = 'POST') {
+    if (method === 'GET') {
+      const response = await fetch(`${API_URL}/query?query=${encodeURIComponent(query)}`);
+      return response.json();
+    } else {
+      const response = await fetch(`${API_URL}/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+      return response.json();
+    }
   },
 };
