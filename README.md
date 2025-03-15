@@ -9,6 +9,33 @@ https://repo.surf/definitelyarjun/quick-code-2025
 ## Project Architecture
 
 ![Architecture](https://github.com/user-attachments/assets/5ec952e5-c44b-4029-9d39-c16fe22fcf4b)
+```
++------+     +---------+             +---------+
+| User |     | Frontend|             | Backend |
++------+     +---------+             +---------+
+   |              |                       |
+   | Upload Study |     Process PDFs      |
+   | Materials -->|---------------------->|
+   |              |                       |
+   | Set Test Date|                       |
+   | ----------->|                        |
+   |              |                       |
+   | Input Study  |   Generate Schedule   |
+   | Progress --> |---------------------->|
+   |              |                       |
+   |              |  Return Adaptive Plan |
+   |              |<----------------------| 
+   |              |                       |
+   | Ask Questions|       RAG Query       |
+   | ----------->|----------------------->|
+   |              |                       |
+   |              | Context-Aware Response|
+   |              |<----------------------| 
+   |              |                       |
++------+     +---------+             +---------+
+| User |     | Frontend|             | Backend |
++------+     +---------+             +---------+
+```
 
 ## Team Members
 
