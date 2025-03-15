@@ -19,7 +19,7 @@ https://repo.surf/definitelyarjun/quick-code-2025
    |              |                       |
    |              |                       |
    |------------->|                       |
-   | Set Test Date|                      |
+   | Set Test Date|                       |
    |              |                       |
    |              |                       | 
    |------------->|   Generate Schedule   |
