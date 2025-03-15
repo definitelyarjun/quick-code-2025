@@ -77,7 +77,7 @@ The frontend will run on http://localhost:3000
 ## Using the Application
 
 1. Open http://localhost:3000 in your browser
-2. Upload study materials (PDFs) using the file upload button (In the future this wont be neccessary as we will store the vecotirized data in the PDF to a DB)
+2. Upload study materials (PDFs) using the file upload button (In the future this wont be neccessary as we will store the vecotirized data in the PDF to a DB, Also this is only required on the first run after which the model uses cached data.)
 4. Ask queries regarding the subject material and also ask questions regarding study planning
 5. Track your progress by marking chapters as complete and logging study time
 
@@ -106,7 +106,7 @@ The frontend will run on http://localhost:3000
    React Router for navigation
    date-fns for date handling
    clsx & tailwind-merge for class name utilities
-   
+
 ```
 quick-code-2025/
 ├── .gitignore
