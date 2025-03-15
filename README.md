@@ -7,8 +7,6 @@ A personalized, college-specific study planner that uses RAG (Retrieval-Augmente
 https://repo.surf/definitelyarjun/quick-code-2025
 
 ## Project Architecture
-
-![Architecture](https://github.com/user-attachments/assets/5ec952e5-c44b-4029-9d39-c16fe22fcf4b)
 ```
 +------+     +---------+             +---------+
 | User |     | Frontend|             | Backend |
@@ -36,7 +34,6 @@ https://repo.surf/definitelyarjun/quick-code-2025
 | User |     | Frontend|             | Backend |
 +------+     +---------+             +---------+
 ```
-
 ## Team Members
 
 Arjun Jayakumar (Team Lead- Backend and LLM's)
