@@ -106,8 +106,72 @@ The frontend will run on http://localhost:3000
    React Router for navigation
    date-fns for date handling
    clsx & tailwind-merge for class name utilities
-
-![Directory Structure](https://github.com/user-attachments/assets/86aa8cd3-e249-43d6-b406-dfbc2f86d1c4)
+   
+```
+quick-code-2025/
+├── .gitignore
+├── README.md
+├── Sample-os.pdf
+│
+├── backend/
+│   ├── .gitignore
+│   ├── app.py
+│   ├── create_test_pdf.py
+│   ├── README.md
+│   ├── requirements.txt
+│   ├── start.py
+│   ├── test_document.txt
+│   ├── test_rag.py
+│   ├── feedback/
+│   ├── model_cache/
+│   │   └── embeddings/
+│   │       ├── document_chunks.json
+│   │       └── document_embeddings.npy
+│   ├── uploaded_pdfs/
+│   │   ├── Module_1.pdf
+│   │   └── Sample-os.pdf
+│   └── uploads/
+│
+├── embeddings/
+│   ├── architecture.jpg
+│   └── UI - With Functionalities .png
+│
+└── frontend/
+    ├── .gitignore
+    ├── package-lock.json
+    ├── package.json
+    ├── postcss.config.js
+    ├── tailwind.config.js
+    ├── public/
+    │   ├── index.html
+    │   └── manifest.json
+    └── src/
+        ├── App.js
+        ├── index.css
+        ├── index.js
+        ├── reportWebVitals.js
+        ├── components/
+        │   ├── StudyPlanner.jsx
+        │   ├── StudyQuerySystem.jsx
+        │   └── ui/
+        │       ├── button.jsx
+        │       ├── calendar.jsx
+        │       ├── card.jsx
+        │       ├── chat-bubble.jsx
+        │       ├── chat-message-list.jsx
+        │       ├── file-upload.jsx
+        │       ├── input.jsx
+        │       ├── label.jsx
+        │       ├── popover.jsx
+        │       ├── progress.jsx
+        │       ├── study-planner.jsx
+        │       ├── study-query-system.jsx
+        │       └── tabs.jsx
+        ├── lib/
+        │   └── utils.js
+        └── services/
+            └── api.js
+```
 
 ## Future Enhancements
 
