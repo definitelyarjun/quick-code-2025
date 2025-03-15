@@ -12,20 +12,26 @@ https://repo.surf/definitelyarjun/quick-code-2025
 | User |     | Frontend|             | Backend |
 +------+     +---------+             +---------+
    |              |                       |
-   | Upload Study |     Process PDFs      |
-   | Materials -->|---------------------->|
+   |              |     Process PDFs      |
+   |------------->|---------------------->|
+   | Upload Study |                       |
+   | Materials    |                       |
    |              |                       |
-   | Set Test Date|                       |
-   | ----------->|                        |
    |              |                       |
-   | Input Study  |   Generate Schedule   |
-   | Progress --> |---------------------->|
+   |------------->|                       |
+   | Set Test Date|                      |
+   |              |                       |
+   |              |                       | 
+   |------------->|   Generate Schedule   |
+   | Input Study  |---------------------->|
+   | Progress     |                       |
    |              |                       |
    |              |  Return Adaptive Plan |
    |              |<----------------------| 
    |              |                       |
-   | Ask Questions|       RAG Query       |
-   | ----------->|----------------------->|
+   |              |       RAG Query       |
+   |------------->|---------------------->|
+   | Ask Questions|                       |
    |              |                       |
    |              | Context-Aware Response|
    |              |<----------------------| 
